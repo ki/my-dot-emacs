@@ -1,7 +1,3 @@
-;; after changing .emacs
-;; put cursor at the end of sexp and hit C-x C-e to eval it
-;; http://groups.google.com/group/gnu.emacs.help/msg/a4016f5a0b5363ff
-
 (message "*****  .emacs loading  *****")
 
 ; -------------------- stevey bgn --------------------
@@ -11,25 +7,17 @@
       "C:/users/kirath/"
       "~/"))
 
-; http://www.rattlesnake.com/intro/Loading-Files.html
-; previously: (setq load-path (cons (concat emacs-root "emacs") load-path))
 (add-to-list 'load-path (concat emacs-root "emacs"))
-;(add-to-list 'load-path (concat emacs-root "emacs/color-theme-6.6.0"))
 
 (require 'cl)
 
 (global-set-key "\C-x\C-m" 'execute-extended-command)
-(global-set-key "\C-c\C-m" 'execute-extended-command)
 
 (define-key global-map [f8] 'kill-region)
 (global-set-key "\C-w" 'backward-kill-word)
-(define-key global-map [f6] 'magit-status)
+
 
 ;(global-set-key "\C-w" 'my-custom-kill)
-
-;backward-kill-word
-;(global-set-key "\C-c\C-k" 'kill-region)
-
 ;(defun my-custom-kill ()
 ;  (interactive "p")
 ;  (if mark-active
@@ -38,50 +26,19 @@
 
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 (if (fboundp 'tool-bar-mode)   (tool-bar-mode -1))
-;(if (fboundp 'menu-bar-mode)   (menu-bar-mode -1))
+(if (fboundp 'menu-bar-mode)   (menu-bar-mode -1))
  
-(defun rename-file-and-buffer (new-name)
- "Renames both current buffer and file it's visiting to NEW-NAME." 
- (interactive "sNew name: ")
- (let ((name (buffer-name))
-    (filename (buffer-file-name)))
- (if (not filename)
-    (message "Buffer '%s' is not visiting a file!" name)
- (if (get-buffer new-name)
-     (message "A buffer named '%s' already exists!" new-name)
-    (progn      
-      (rename-file name new-name 1)      
-      (rename-buffer new-name)      
-      (set-visited-file-name new-name)      
-      (set-buffer-modified-p nil)))))) 
-
-(defun move-buffer-file (dir)
- "Moves both current buffer and file it's visiting to DIR." (interactive "DNew directory: ")
- (let* ((name (buffer-name))
-     (filename (buffer-file-name))
-     (dir
-     (if (string-match dir "\\(?:/\\|\\\\)$")
-     (substring dir 0 -1) dir))
-     (newname (concat dir "/" name)))
-
- (if (not filename)
-    (message "Buffer '%s' is not visiting a file!" name)
- (progn     
-   (copy-file filename newname 1)     
-   (delete-file filename)     
-   (set-visited-file-name newname)     
-   (set-buffer-modified-p nil)     
-   t)))) 
-
 (global-set-key [f5] 'call-last-kbd-macro)
 
 ; -------------------- stevey end --------------------
 
-
 ; git
+
 ; http://www.emacswiki.org/cgi-bin/wiki/Git
 (if (eq system-type 'windows-nt)
-    (message "i am skipping git")
+    (progn
+      (require 'magit)
+      (define-key global-map [f6] 'magit-status))
     (progn
       (message "i am loading git")
       (add-to-list 'load-path (expand-file-name "/usr/share/doc/git-core/contrib/emacs"))
@@ -90,7 +47,6 @@
       (require 'git)
       (autoload 'git-blame-mode "git-blame"
         "Minor mode for incremental blame for Git." t)))
-
 
 ; tab
 ; http://student.northpark.edu/pemente/emacs_tabs.htm
@@ -102,18 +58,14 @@
 (setq show-paren-mode t)
 (setq show-paren-style 'parenthesis)
 
-
 ; --- to learn from ---
 ; http://www.emacswiki.org/cgi-bin/wiki/emacs-init.el
 ; this url seems to be a good resource
 (setq inhibit-startup-message t)
-; ----------------------------------------
 
 
-; ----------------------------------------
 ; http://homepages.inf.ed.ac.uk/s0243221/emacs/
 ; http://tldp.org/HOWTO/Emacs-Beginner-HOWTO-4.html
-
 (defun alt-colors-1 ()
   (progn
      (set-cursor-color "Orchid")
@@ -140,9 +92,6 @@
 ; (setq show-paren-style 'expression)
 
 
-; http://geosoft.no/development/emacs.html
-; (global-set-key [kp-subtract] 'undo)
-
 ; http://infolab.stanford.edu/~manku/dotemacs.html
 (transient-mark-mode t) ; highlight marked region
 
@@ -153,6 +102,7 @@
   ;; Your init file should contain only one such instance.
   ;; If there is more than one, they won't work right.
  '(blink-cursor-mode nil))
+
 (defun alt-colors-2 ()
   (progn
 	 (set-background-color "DimGray")
@@ -245,7 +195,6 @@
 ; w3m
 ; http://www.emacswiki.org/cgi-bin/emacs-en/emacs-w3m
 ; http://emacs-w3m.namazu.org/
-
 (if (eq system-type 'windows-nt)
     (message "i am skipping w3m")
   (progn
@@ -256,24 +205,10 @@
     (global-set-key "\C-xm" 'browse-url-at-point)))
 
 
-
 (define-key global-map [f11] " - ")
 (define-key global-map [f12] "   -- ")
 (global-set-key [kp-subtract] "\C-a\C-k\C-d") ; numpad minus = nuke line
 
-; my very own code - begin
-(defun my-eval-sexp-and-ins ()
-"This function evaluates preceeding sexp and inserts the result into the buffer at point."
-  (interactive)
-  (let (result1)
-    (setq result1 (eval-last-sexp nil))
-    (insert 
-     " ="
-     (number-to-string result1))))
-
-(define-key global-map [f2] 'my-eval-sexp-and-ins)
-; [Aug 26, 2008] Just now I learned that C-j does almost the same thing!
-; my very own code - end
 
 ; auto encryption - begin
 ; http://www.emacswiki.org/cgi-bin/wiki/AutoEncryption
@@ -334,7 +269,7 @@
 
 ; ----------------------------------------
 
-;(split-window-horizontally)
+(split-window-horizontally)
 
 ; cygwin
 ; http://www.khngai.com/emacs/cygwin.php
@@ -375,30 +310,29 @@
 
 ; ------------------------------------------------------------
 ; open my files
-; my own code :-)
 
-(message "i am loading files from thumb drive")
+;; (message "i am loading files from thumb drive")
 
-(defun thumbdrive ()
-  (if (eq system-type 'windows-nt)
-      '"f:/"
-    '"/media/HANZO\ SWORD/"))
+;; (defun thumbdrive ()
+;;   (if (eq system-type 'windows-nt)
+;;       '"f:/"
+;;     '"/media/HANZO\ SWORD/"))
 
-(defun open-file-if-exists (file1)
-  (when (file-readable-p file1)
-    (find-file file1)))
+;; (defun open-file-if-exists (file1)
+;;   (when (file-readable-p file1)
+;;     (find-file file1)))
 
-(defun oife (file1)
-  (open-file-if-exists (concat (thumbdrive) "Performance/" file1)))
+;; (defun oife (file1)
+;;   (open-file-if-exists (concat (thumbdrive) "Performance/" file1)))
 
-(mapc 'oife
-      (list
-       "done.txt"
-       "goals.txt"
-       "ideas.txt"
-       "startup-log.txt"
-       "try-new-habits.org"
-       "todo.txt"))
+;; (mapc 'oife
+;;       (list
+;;        "done.txt"
+;;        "goals.txt"
+;;        "ideas.txt"
+;;        "startup-log.txt"
+;;        "try-new-habits.org"
+;;        "todo.txt"))
 
 ; ------------------------------------------------------------
 
@@ -490,8 +424,6 @@
 (autoload 'js2-mode "js2" nil t)
 (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
   
-(message "*****  .emacs loaded  *****")
-
 (if (eq system-type 'windows-nt)
     (custom-set-faces
      ;; custom-set-faces was added by Custom.
@@ -513,5 +445,8 @@
                   :width normal 
                   :family "outline-consolas"))))))
 
-(require 'magit)
+(setq ipython-command "/usr/bin/ipython")
+(require 'ipython)
 
+
+(message "*****  .emacs loaded  *****")
