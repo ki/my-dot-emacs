@@ -1,0 +1,517 @@
+;; after changing .emacs
+;; put cursor at the end of sexp and hit C-x C-e to eval it
+;; http://groups.google.com/group/gnu.emacs.help/msg/a4016f5a0b5363ff
+
+(message "*****  .emacs loading  *****")
+
+; -------------------- stevey bgn --------------------
+ 
+(defvar emacs-root 
+  (if (eq system-type 'windows-nt)
+      "C:/users/kirath/"
+      "~/"))
+
+; http://www.rattlesnake.com/intro/Loading-Files.html
+; previously: (setq load-path (cons (concat emacs-root "emacs") load-path))
+(add-to-list 'load-path (concat emacs-root "emacs"))
+;(add-to-list 'load-path (concat emacs-root "emacs/color-theme-6.6.0"))
+
+(require 'cl)
+
+(global-set-key "\C-x\C-m" 'execute-extended-command)
+(global-set-key "\C-c\C-m" 'execute-extended-command)
+
+(define-key global-map [f8] 'kill-region)
+(global-set-key "\C-w" 'backward-kill-word)
+(define-key global-map [f6] 'magit-status)
+
+;(global-set-key "\C-w" 'my-custom-kill)
+
+;backward-kill-word
+;(global-set-key "\C-c\C-k" 'kill-region)
+
+;(defun my-custom-kill ()
+;  (interactive "p")
+;  (if mark-active
+;      'kill-region
+;    'backward-kill-word))
+
+(if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+(if (fboundp 'tool-bar-mode)   (tool-bar-mode -1))
+;(if (fboundp 'menu-bar-mode)   (menu-bar-mode -1))
+ 
+(defun rename-file-and-buffer (new-name)
+ "Renames both current buffer and file it's visiting to NEW-NAME." 
+ (interactive "sNew name: ")
+ (let ((name (buffer-name))
+    (filename (buffer-file-name)))
+ (if (not filename)
+    (message "Buffer '%s' is not visiting a file!" name)
+ (if (get-buffer new-name)
+     (message "A buffer named '%s' already exists!" new-name)
+    (progn      
+      (rename-file name new-name 1)      
+      (rename-buffer new-name)      
+      (set-visited-file-name new-name)      
+      (set-buffer-modified-p nil)))))) 
+
+(defun move-buffer-file (dir)
+ "Moves both current buffer and file it's visiting to DIR." (interactive "DNew directory: ")
+ (let* ((name (buffer-name))
+     (filename (buffer-file-name))
+     (dir
+     (if (string-match dir "\\(?:/\\|\\\\)$")
+     (substring dir 0 -1) dir))
+     (newname (concat dir "/" name)))
+
+ (if (not filename)
+    (message "Buffer '%s' is not visiting a file!" name)
+ (progn     
+   (copy-file filename newname 1)     
+   (delete-file filename)     
+   (set-visited-file-name newname)     
+   (set-buffer-modified-p nil)     
+   t)))) 
+
+(global-set-key [f5] 'call-last-kbd-macro)
+
+; -------------------- stevey end --------------------
+
+
+; git
+; http://www.emacswiki.org/cgi-bin/wiki/Git
+(if (eq system-type 'windows-nt)
+    (message "i am skipping git")
+    (progn
+      (message "i am loading git")
+      (add-to-list 'load-path (expand-file-name "/usr/share/doc/git-core/contrib/emacs"))
+      (require 'vc-git)
+      (when (featurep 'vc-git) (add-to-list 'vc-handled-backends 'git))
+      (require 'git)
+      (autoload 'git-blame-mode "git-blame"
+        "Minor mode for incremental blame for Git." t)))
+
+
+; tab
+; http://student.northpark.edu/pemente/emacs_tabs.htm
+(setq-default tab-width 4)
+(setq-default indent-tabs-mode nil)
+
+
+; http://www.emacs.uniyar.ac.ru/doc/em24h/emacs100.htm
+(setq show-paren-mode t)
+(setq show-paren-style 'parenthesis)
+
+
+; --- to learn from ---
+; http://www.emacswiki.org/cgi-bin/wiki/emacs-init.el
+; this url seems to be a good resource
+(setq inhibit-startup-message t)
+; ----------------------------------------
+
+
+; ----------------------------------------
+; http://homepages.inf.ed.ac.uk/s0243221/emacs/
+; http://tldp.org/HOWTO/Emacs-Beginner-HOWTO-4.html
+
+(defun alt-colors-1 ()
+  (progn
+     (set-cursor-color "Orchid")
+     (set-mouse-color "Orchid")
+     (set-background-color "DarkSlateGray")
+     (set-foreground-color "Wheat")
+     (global-hl-line-mode 1)
+	 ))
+
+; lines
+(setq scroll-step 1) 
+(line-number-mode 1)
+(column-number-mode 1)
+
+; backup 
+(setq make-backup-files t)
+(setq version-control t)
+(setq backup-directory-alist (quote ((".*" . "~/.emacs_backups/"))))
+; ----------------------------------------
+
+; paren hilite
+; http://www.emacsblog.org/2007/08/07/quick-tip-show-paren-mode/
+(show-paren-mode t)
+; (setq show-paren-style 'expression)
+
+
+; http://geosoft.no/development/emacs.html
+; (global-set-key [kp-subtract] 'undo)
+
+; http://infolab.stanford.edu/~manku/dotemacs.html
+(transient-mark-mode t) ; highlight marked region
+
+; http://www.math.umn.edu/~garrett/shortest/emacs_customization.html
+(custom-set-variables
+  ;; custom-set-variables was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+ '(blink-cursor-mode nil))
+(defun alt-colors-2 ()
+  (progn
+	 (set-background-color "DimGray")
+	 (set-foreground-color "LightGray")
+	 (set-cursor-color "DarkSlateBlue")
+	 (set-border-color "DimGray")
+	 (set-mouse-color "DarkSlateBlue")
+	 
+	 (set-face-background 'default "DimGray")
+	 (set-face-background 'region "DarkSlateGray")
+	 (set-face-background 'highlight "DarkSlateBlue")
+	 (set-face-background 'modeline "DarkSlateBlue") ;;; CornflowerBlue")
+	 
+	 (set-face-foreground 'default "LightGray")
+	 (set-face-foreground 'region "Ivory")
+	 (set-face-foreground 'highlight "LightGray")  ;;; DimGray")
+	 (set-face-foreground 'modeline "LightGray")
+	 ))
+
+(setq-default delete-old-versions 't)
+(alt-colors-1) 
+(dired emacs-root)
+(rename-buffer "dired1")
+(shell)
+(find-file (concat emacs-root ".emacs"))
+
+
+; ----------------------------------------
+; http://www.zafar.se/bkz/Articles/EmacsTips
+
+(add-hook 'isearch-mode-end-hook 'custom-goto-match-beginning)
+
+(defun custom-goto-match-beginning ()
+  "Use with isearch hook to end search at first char of match."
+  (when isearch-forward (goto-char isearch-other-end)))
+; ----------------------------------------
+
+(setq resize-minibuffer-mode t)
+
+; ----------------------------------------
+; http://www.emacswiki.org/cgi-bin/wiki/EmacsNiftyTricks#toc3
+(defadvice save-buffers-kill-emacs (around no-query-kill-emacs activate)
+  "Prevent annoying \"Active processes exist\" query when you quit Emacs."
+  (flet ((process-list ())) ad-do-it))
+
+(fset 'yes-or-no-p 'y-or-n-p)
+; ----------------------------------------
+
+; http://common-lisp.net/project/slime/doc/html/Installation.html#Installation
+; slime
+
+; installation: 
+; apt-get install sbcl sbcl-doc sbcl-source slime
+
+; bookmark: [transcript of marco baringer's slime movie]
+; http://www.pchristensen.com/blog/articles/reference-for-the-slimelispemacs-screencast/#comment-144
+
+(if (eq system-type 'windows-nt)
+    (progn
+;      (message "i am starting slime")
+;      (setq inferior-lisp-program "C:/sbcl-1.0.19/sbcl.exe --core C:/sbcl-1.0.19/sbcl.core")
+;      (add-to-list 'load-path "C:/slime")
+;      (require 'slime)
+;      (slime-setup)
+;      (slime-setup '(slime-fancy slime-asdf))
+;      (slime)
+;      (setq slime-startup-animation nil)
+      )
+  (progn
+      (message "i am starting slime")
+      (setq inferior-lisp-program "/usr/bin/sbcl")
+      (add-to-list 'load-path "/usr/share/emacs/site-lisp/slime")
+      (require 'slime)
+      (slime-setup)
+      (slime-setup '(slime-fancy slime-asdf))
+      (slime)
+      ; http://www.jasondunsmore.com/emacs/dotemacs.txt
+      (setq slime-startup-animation nil)))
+
+; color theme
+; http://www.emacswiki.org/cgi-bin/wiki?ColorTheme
+; http://www.cs.cmu.edu/~maverick/GNUEmacsColorThemeTest/
+
+;(require 'color-theme)
+;(color-theme-initialize)
+;(color-theme-robin-hood)
+;(color-theme-subtle-hacker)
+
+
+; w3m
+; http://www.emacswiki.org/cgi-bin/emacs-en/emacs-w3m
+; http://emacs-w3m.namazu.org/
+
+(if (eq system-type 'windows-nt)
+    (message "i am skipping w3m")
+  (progn
+    (message "i am starting w3m")
+    (add-to-list 'load-path  (concat emacs-root "emacs/emacs-w3m-1.4.4"))
+    (setq browse-url-browser-function 'w3m-browse-url)
+    (autoload 'w3m-browse-url "w3m" "Ask a WWW browser to show a URL." t)
+    (global-set-key "\C-xm" 'browse-url-at-point)))
+
+
+
+(define-key global-map [f11] " - ")
+(define-key global-map [f12] "   -- ")
+(global-set-key [kp-subtract] "\C-a\C-k\C-d") ; numpad minus = nuke line
+
+; my very own code - begin
+(defun my-eval-sexp-and-ins ()
+"This function evaluates preceeding sexp and inserts the result into the buffer at point."
+  (interactive)
+  (let (result1)
+    (setq result1 (eval-last-sexp nil))
+    (insert 
+     " ="
+     (number-to-string result1))))
+
+(define-key global-map [f2] 'my-eval-sexp-and-ins)
+; [Aug 26, 2008] Just now I learned that C-j does almost the same thing!
+; my very own code - end
+
+; auto encryption - begin
+; http://www.emacswiki.org/cgi-bin/wiki/AutoEncryption
+(defvar pgg-gpg-user-id "kirubakaran")
+(autoload 'pgg-make-temp-file "pgg" "PGG")
+(autoload 'pgg-gpg-decrypt-region "pgg-gpg" "PGG GnuPG")
+(define-generic-mode 'gpg-file-mode
+  (list ?#) 
+  nil nil
+  '(".gpg\\'" ".gpg-encrypted\\'")
+  (list (lambda ()
+	    (add-hook 'before-save-hook
+                      (lambda () 
+                        (let ((pgg-output-buffer (current-buffer)))
+                          (pgg-gpg-encrypt-region (point-min) (point-max)
+                                                  (list pgg-gpg-user-id))))
+                      nil t)
+	    (add-hook 'after-save-hook 
+		      (lambda ()
+                        (let ((pgg-output-buffer (current-buffer)))
+                          (pgg-gpg-decrypt-region (point-min) (point-max)))
+			(set-buffer-modified-p nil)
+			(auto-save-mode nil))
+		      nil t)
+            (let ((pgg-output-buffer (current-buffer)))
+              (pgg-gpg-decrypt-region (point-min) (point-max)))
+	    (auto-save-mode nil)
+	    (set-buffer-modified-p nil)))
+  "Mode for gpg encrypted files")
+; auto encryption - end
+
+; ----------------------------------------
+; set window title to contain the current buffer name
+; this is so that rescue-time can see what buffer I am in
+; I don't want everything I do in emacs to be classified as 'dev work'
+
+;(defadvice switch-to-buffer (after name-the-frame (arg))
+;  (set-frame-name (concat (buffer-name) " - emacs")))
+;  
+;(ad-activate 'switch-to-buffer)
+
+; a method that wasn't sufficient:
+;(global-set-key [f10] 
+;                '(lambda ()
+;                   (interactive)
+;                   (set-frame-name (concat "emacs : " (buffer-name)))))
+
+; a method that didn't work:
+;(global-set-key "\C-xb" 
+;                '(lambda (buffer &optional norecord)
+;                     (interactive)
+;                     (set-frame-name (concat "emacs : " (buffer-name)))
+;                     (switch-to-buffer buffer norecord)))
+
+; references:
+; http://www.gnu.org/software/emacs/elisp/html_node/Advising-Functions.html#Advising-Functions
+; http://groups.google.com/group/gnu.emacs.help/browse_thread/thread/9e50dd3a196c86c8
+
+; ----------------------------------------
+
+;(split-window-horizontally)
+
+; cygwin
+; http://www.khngai.com/emacs/cygwin.php
+(if (eq system-type 'windows-nt)
+   (progn
+     (setenv "PATH" (concat (getenv "PATH") ";C:\\users\\kirath\\cygwin\\bin"))
+     (setq exec-path (cons "c:/users/kirath/cygwin/bin/" exec-path))
+     (require 'cygwin-mount)
+     (cygwin-mount-activate)
+     
+     ; Replace DOS shell with Cygwin Bash Shell
+     (add-hook 'comint-output-filter-functions
+               'shell-strip-ctrl-m nil t)
+     (add-hook 'comint-output-filter-functions
+               'comint-watch-for-password-prompt nil t)
+     (setq explicit-shell-file-name "bash.exe")
+     ;; For subprocesses invoked via the shell
+     ;; (e.g., "shell -c command")
+     (setq shell-file-name explicit-shell-file-name)))
+
+; ------------------------------------------------------------
+; python mode
+; http://www.emacswiki.org/cgi-bin/wiki/PythonMode
+;; (add-hook 'python-mode-hook
+;;           (lambda ()
+;;             (define-key python-mode-map "\"" 'electric-pair)
+;;             (define-key python-mode-map "\'" 'electric-pair)
+;;             (define-key python-mode-map "(" 'electric-pair)
+;;             (define-key python-mode-map "[" 'electric-pair)
+;;             (define-key python-mode-map "{" 'electric-pair)))
+
+;; (defun electric-pair ()
+;;   "Insert character pair without sournding spaces"
+;;   (interactive)
+;;   (let (parens-require-spaces)
+;;     (insert-pair)))
+; ------------------------------------------------------------
+
+; ------------------------------------------------------------
+; open my files
+; my own code :-)
+
+(message "i am loading files from thumb drive")
+
+(defun thumbdrive ()
+  (if (eq system-type 'windows-nt)
+      '"f:/"
+    '"/media/HANZO\ SWORD/"))
+
+(defun open-file-if-exists (file1)
+  (when (file-readable-p file1)
+    (find-file file1)))
+
+(defun oife (file1)
+  (open-file-if-exists (concat (thumbdrive) "Performance/" file1)))
+
+(mapc 'oife
+      (list
+       "done.txt"
+       "goals.txt"
+       "ideas.txt"
+       "startup-log.txt"
+       "try-new-habits.org"
+       "todo.txt"))
+
+; ------------------------------------------------------------
+
+(defun my-date ()
+  (interactive)
+  (insert
+   (concat "[" (format-time-string "%b %d, %Y %H:%M") "]")))
+
+(define-key global-map [f3] 'my-date)
+
+; ------------------------------------------------------------
+
+; ---
+; copy line without selection
+; http://www.emacswiki.org/cgi-bin/wiki/CopyWithoutSelection
+(defun copy-line (&optional arg)
+  "Save current line into Kill-Ring without mark the line "
+  (interactive "P")
+  (let ((beg (line-beginning-position)) 
+     	(end (line-end-position arg)))
+    (copy-region-as-kill beg end)))
+
+(global-set-key (kbd "C-c l") 'copy-line)
+; ---
+
+(defun totd ()
+  (interactive)
+  (random t) ;; seed with time-of-day
+  (with-output-to-temp-buffer "*Tip of the day*"
+    (let* ((commands (loop for s being the symbols
+                           when (commandp s) collect s))
+           (command (nth (random (length commands)) commands)))
+      (princ
+       (concat "Your tip for the day is:\n"
+               "========================\n\n"
+               (describe-function command)
+               "\n\nInvoke with:\n\n"
+               (with-temp-buffer
+                 (where-is command t)
+                 (buffer-string)))))))
+
+(totd)
+
+; ------------------------------------------------------------
+; http://mail.python.org/pipermail/python-list/2007-October/464038.html
+(defun my-file-processing-fn (fpath)
+  "\nelisp file processing function. \nKill word that occurs after kite and hoo. \n~Kirubakaran\n"
+  (interactive)
+  (let (mybuffer)
+    (setq mybuffer (find-file fpath))
+    (search-forward "kite")
+    (search-forward "hoo")
+    (kill-word (point))
+    (save-buffer)
+    (kill-buffer mybuffer)))
+; ------------------------------------------------------------
+
+; ------------------------------------------------------------
+; http://www3.ntu.edu.sg/home5/pg04878518/EmacsTools.html
+
+(require 'ido)
+(ido-mode t)
+
+;(require 'browse-kill-ring)
+;(global-set-key [(control c)(k)] 'browse-kill-ring)
+;(browse-kill-ring-default-keybindings)
+
+(defun match-paren (arg)
+  "Go to the matching paren if on a paren; otherwise insert %."
+  (interactive "p")
+  (cond ((looking-at "\\s\(") (forward-list 1) (backward-char 1))
+        ((looking-at "\\s\)") (forward-char 1) (backward-list 1))
+        (t (self-insert-command (or arg 1)))))
+
+(global-set-key "%" 'match-paren)
+
+(require 'generic)
+(require 'generic-x)
+
+(if (not (eq system-type 'windows-nt))
+    (setq x-select-enable-clipboard 't))
+
+(autoload 'gtypist-mode "gtypist-mode")
+(setq auto-mode-alist
+      (cons '("\\.typ\\'" . gtypist-mode) auto-mode-alist))
+
+; ------------------------------------------------------------
+
+(autoload 'js2-mode "js2" nil t)
+(add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
+  
+(message "*****  .emacs loaded  *****")
+
+(if (eq system-type 'windows-nt)
+    (custom-set-faces
+     ;; custom-set-faces was added by Custom.
+     ;; If you edit it by hand, you could mess it up, so be careful.
+     ;; Your init file should contain only one such instance.
+     ;; If there is more than one, they won't work right.
+     '(default ((t 
+                 (:stipple nil 
+                  :background "DarkSlateGray" 
+                  :foreground "Wheat" 
+                  :inverse-video nil 
+                  :box nil 
+                  :strike-through nil 
+                  :overline nil 
+                  :underline nil 
+                  :slant normal 
+                  :weight normal 
+                  :height 140 
+                  :width normal 
+                  :family "outline-consolas"))))))
+
+(require 'magit)
+
