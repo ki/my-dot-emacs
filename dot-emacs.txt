@@ -1,10 +1,10 @@
 (message "*****  .emacs loading  *****")
 
-; -------------------- stevey bgn --------------------
- 
+; thank you stevey. i love you :-)
+
 (defvar emacs-root 
   (if (eq system-type 'windows-nt)
-      "C:/users/kirath/"
+      "C:/Users/kirath/"
       "~/"))
 
 (add-to-list 'load-path (concat emacs-root "emacs"))
@@ -16,43 +16,35 @@
 (define-key global-map [f8] 'kill-region)
 (global-set-key "\C-w" 'backward-kill-word)
 
-
-;(global-set-key "\C-w" 'my-custom-kill)
-;(defun my-custom-kill ()
-;  (interactive "p")
-;  (if mark-active
-;      'kill-region
-;    'backward-kill-word))
-
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 (if (fboundp 'tool-bar-mode)   (tool-bar-mode -1))
 (if (fboundp 'menu-bar-mode)   (menu-bar-mode -1))
  
 (global-set-key [f5] 'call-last-kbd-macro)
 
-; -------------------- stevey end --------------------
-
 ; git
 
 ; http://www.emacswiki.org/cgi-bin/wiki/Git
-(if (eq system-type 'windows-nt)
-    (progn
-      (require 'magit)
-      (define-key global-map [f6] 'magit-status))
-    (progn
-      (message "i am loading git")
-      (add-to-list 'load-path (expand-file-name "/usr/share/doc/git-core/contrib/emacs"))
-      (require 'vc-git)
-      (when (featurep 'vc-git) (add-to-list 'vc-handled-backends 'git))
-      (require 'git)
-      (autoload 'git-blame-mode "git-blame"
-        "Minor mode for incremental blame for Git." t)))
+;; (if (eq system-type 'windows-nt)
+;;     (progn
+;;       (require 'magit)
+;;       (define-key global-map [f6] 'magit-status))
+;;     (progn
+;;       (message "i am loading git")
+;;       (add-to-list 'load-path (expand-file-name "/usr/share/doc/git-core/contrib/emacs"))
+;;       (require 'vc-git)
+;;       (when (featurep 'vc-git) (add-to-list 'vc-handled-backends 'git))
+;;       (require 'git)
+;;       (autoload 'git-blame-mode "git-blame"
+;;         "Minor mode for incremental blame for Git." t)))
+
+(require 'magit)
+(define-key global-map [f6] 'magit-status)
 
 ; tab
 ; http://student.northpark.edu/pemente/emacs_tabs.htm
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode nil)
-
 
 ; http://www.emacs.uniyar.ac.ru/doc/em24h/emacs100.htm
 (setq show-paren-mode t)
@@ -126,7 +118,7 @@
 (alt-colors-1) 
 (dired emacs-root)
 (rename-buffer "dired1")
-(shell)
+(eshell)
 (find-file (concat emacs-root ".emacs"))
 
 
@@ -149,6 +141,10 @@
   (flet ((process-list ())) ad-do-it))
 
 (fset 'yes-or-no-p 'y-or-n-p)
+
+;repl for elisp
+(ielm)
+
 ; ----------------------------------------
 
 ; http://common-lisp.net/project/slime/doc/html/Installation.html#Installation
@@ -191,7 +187,6 @@
 ;(color-theme-robin-hood)
 ;(color-theme-subtle-hacker)
 
-
 ; w3m
 ; http://www.emacswiki.org/cgi-bin/emacs-en/emacs-w3m
 ; http://emacs-w3m.namazu.org/
@@ -204,11 +199,9 @@
     (autoload 'w3m-browse-url "w3m" "Ask a WWW browser to show a URL." t)
     (global-set-key "\C-xm" 'browse-url-at-point)))
 
-
 (define-key global-map [f11] " - ")
 (define-key global-map [f12] "   -- ")
 (global-set-key [kp-subtract] "\C-a\C-k\C-d") ; numpad minus = nuke line
-
 
 ; auto encryption - begin
 ; http://www.emacswiki.org/cgi-bin/wiki/AutoEncryption
@@ -395,6 +388,8 @@
 
 (require 'ido)
 (ido-mode t)
+(setq ido-enable-flex-matching t)
+(setq ido-create-new-buffer 'always)
 
 ;(require 'browse-kill-ring)
 ;(global-set-key [(control c)(k)] 'browse-kill-ring)
@@ -445,8 +440,55 @@
                   :width normal 
                   :family "outline-consolas"))))))
 
+(setq py-python-command-args '("-colors" "Linux"))
 (setq ipython-command "/usr/bin/ipython")
 (require 'ipython)
+
+;experimental
+;(add-to-list 'load-path (concat emacs-root "emacs/g-client"))
+;(load-library "g")
+
+
+; makes line into
+; +------+
+; | line |
+; +------+
+
+(global-set-key [f7] 'k_box)
+
+(defun k_box ()
+  (interactive)
+  (setq cur_line (thing-at-point 'line))
+  ;delete trailing newline
+  (if (string= 
+       (substring cur_line -1) 
+       "\n")
+      (progn
+        (setq cur_line 
+              (substring cur_line 0 (- (length cur_line) 1)))))
+  (setq ins_line (concat "| " cur_line " |\n"))
+  (setq border_line 
+        (concat "+" 
+                (make-string (- (length ins_line) 3) ?-)
+                "+"))
+  (beginning-of-line)
+  (kill-line)
+  (insert 
+   border_line
+   "\n"
+   ins_line
+   border_line
+   "\n"))
+
+
+;escreen
+
+(load "escreen")
+(escreen-install)
+(global-set-key (kbd "<s-prior>") 'escreen-goto-prev-screen)
+(global-set-key (kbd "<s-next>")  'escreen-goto-next-screen)
+
+(delete-selection-mode t)
 
 
 (message "*****  .emacs loaded  *****")
